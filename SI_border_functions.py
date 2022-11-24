@@ -173,7 +173,7 @@ def get_border_sat(dset,year,thlong,mlongi,mlati,conc_threshold = 0.5, exGr=Fals
 
 
 
-def calc_centre(dset,year,epsi=0.7, month = 8):
+def calc_centre(dset,year,epsi=0.2, month = 8, period = 12):
     """calculates the SI center to the Northpole for the regridded CMIP6 data
      (siconc values in [0,100]).
     Takes the geographical mean point of the cells with highest sea ice concentration 
@@ -184,11 +184,12 @@ def calc_centre(dset,year,epsi=0.7, month = 8):
         and variable siconc in [0,100] in the ocean and nan on land
     year: specify the year
     month: specify which month to look at, default: 8 (september)
+    period: take every "period"th time point, default: 12 (months -> every year)
     """
 
     southb = np.where(dset.lat>60)[0][0] #first index where lat> 60 degrees N
 
-    t=month+year*12
+    t=month+year*period
     
     x=dset['siconc'].isel(time=t)[southb:,::]
     maxlats=np.where((x>=np.max(x)-epsi*np.max(x)) & (x>=15.0))[0]
@@ -229,7 +230,7 @@ def calc_centre(dset,year,epsi=0.7, month = 8):
 
 
 
-def get_border(dset,year,thlong,mlongi,mlati,exGr=False, month = 8): #get border with moving center
+def get_border(dset,year,thlong,mlongi,mlati,exGr=False, month = 8, period=12): 
     """ calculates the borderpoints of a (regridded) CMIP6 dataset in lat/lon gridding, 
     we consider to have no sea ice in a cell, if siconc < 15%
     dset: xarray dataset, with coordinates time, lat in [-180,180], lon in [-90,90] 
@@ -240,9 +241,10 @@ def get_border(dset,year,thlong,mlongi,mlati,exGr=False, month = 8): #get border
     mlati: latitude of the center
     exGr: flag if SI close to Greenland should be ignored, default: False
     month: specify which month to look at, default: 8 (september)
+    period: take every "period"th time point, default: 12 (months -> every year)
     """
     
-    t=month+12*year
+    t=month+period*year
 
     southb = np.where(dset.lat>60)[0][0] #first index where lat> 60 degrees N
 
